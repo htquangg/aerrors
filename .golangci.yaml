@@ -1,0 +1,105 @@
+run:
+  concurrency: 4
+  timeout: 10m
+  go: '1.22'
+
+linters-settings:
+  gocyclo:
+    min-complexity: 25
+  dupl:
+    threshold: 100
+  goconst:
+    min-len: 2
+    min-occurrences: 3
+  misspell:
+    locale: US
+  goimports:
+    local-prefixes: github.com/htquangg/avault
+  gocritic:
+    enabled-tags:
+      - diagnostic
+      - experimental
+      - opinionated
+      - performance
+      - style
+    disabled-checks:
+      - wrapperFunc
+      - ifElseChain
+  funlen:
+    lines: 350
+    statements: 200
+  revive:
+    # default rules derived from upstream revive repo
+    # https://github.com/walles/revive/blob/f417cbd57c6d90b43bdb7f113c222e5aeef117e5/defaults.toml
+    rules:
+      - name: blank-imports
+      - name: context-as-argument
+      - name: context-keys-type
+      - name: dot-imports
+      - name: error-return
+      - name: error-strings
+      - name: error-naming
+      - name: exported
+      # - name: if-return
+      - name: increment-decrement
+      - name: var-naming
+      - name: var-declaration
+      - name: package-comments
+      - name: range
+      - name: receiver-naming
+      - name: time-naming
+      - name: unexported-return
+      - name: indent-error-flow
+      - name: errorf
+      - name: empty-block
+      - name: superfluous-else
+      # - name: unused-parameter
+      - name: unreachable-code
+      - name: redefines-builtin-id
+
+linters:
+  disable-all: true
+  enable:
+    - bodyclose
+    # - deadcode
+    # - depguard
+    - dogsled
+    # - dupl
+    # - errcheck
+    - funlen
+    - gocritic
+    - gocyclo
+    # - gofmt
+    - goimports
+    - revive
+    # - gosec
+    - gosimple
+    - govet
+    - ineffassign
+    - misspell
+    - nakedret
+    - exportloopref
+    - staticcheck
+    # - structcheck
+    - stylecheck
+    - typecheck
+    - unconvert
+    - unused
+    # - varcheck
+    - whitespace
+    - goconst
+    - unused
+    # - gochecknoinits
+
+issues:
+  exclude-dirs:
+    - .artifacts
+    - .codecov
+    - .github
+    - build
+    - deploy
+    - proto
+    - tools
+  exclude:
+    - consider giving a name to these results
+    - include an explanation for nolint directive

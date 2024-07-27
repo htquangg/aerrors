@@ -1,0 +1,17 @@
+# Test binary, build with `go test -c`
+*.test
+
+# Coverage
+coverage.txt
+profile.cov
+
+*.out
+
+#Debug
+__debug_bin*
+debug
+
+# IDE
+.idea
+.vscode
+.DS_STORE

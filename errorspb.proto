@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package aerrors;
+
+message ErrorDetail {
+  string Reason = 1;
+  string Message = 2;
+  string TypeCode = 3;
+  int64 HTTPCode = 4;
+  int64 GRPCCode = 5;
+}
