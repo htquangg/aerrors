@@ -40,80 +40,80 @@ const (
 	ErrGatewayTimeout             ErrorCode = "GATEWAY_TIMEOUT"               // HTTP: 504 GRPC: codes.DeadlineExceeded
 )
 
-func InvalidArgument(reason string) *AError {
-	return New(ErrInvalidArgument, reason)
+func InvalidArgument(reason string, opts ...AErrorOption) *AError {
+	return New(ErrInvalidArgument, reason, opts...)
 }
 
 func IsValidArgument(err *AError) bool {
 	return err.code == ErrInvalidArgument
 }
 
-func FailedPrecondition(reason string) *AError {
-	return New(ErrFailedPrecondition, reason)
+func FailedPrecondition(reason string, opts ...AErrorOption) *AError {
+	return New(ErrFailedPrecondition, reason, opts...)
 }
 
 func IsFailedPrecondition(err *AError) bool {
 	return err.code == ErrFailedPrecondition
 }
 
-func Unauthentication(reason string) *AError {
-	return New(ErrUnauthenticated, reason)
+func Unauthentication(reason string, opts ...AErrorOption) *AError {
+	return New(ErrUnauthenticated, reason, opts...)
 }
 
 func IsUnauthentication(err *AError) bool {
 	return err.code == ErrUnauthenticated || err.code == ErrUnauthorized
 }
 
-func PermissionDenied(reason string) *AError {
-	return New(ErrPermissionDenied, reason)
+func PermissionDenied(reason string, opts ...AErrorOption) *AError {
+	return New(ErrPermissionDenied, reason, opts...)
 }
 
 func IsPermissionDenied(err *AError) bool {
 	return err.code == ErrPermissionDenied || err.code == ErrForbidden
 }
 
-func NotFound(reason string) *AError {
-	return New(ErrNotFound, reason)
+func NotFound(reason string, opts ...AErrorOption) *AError {
+	return New(ErrNotFound, reason, opts...)
 }
 
 func IsNotFound(err *AError) bool {
 	return err.code == ErrNotFound
 }
 
-func AlreadyExists(reason string) *AError {
-	return New(ErrConflict, reason)
+func AlreadyExists(reason string, opts ...AErrorOption) *AError {
+	return New(ErrConflict, reason, opts...)
 }
 
 func IsAlreadyExists(err *AError) bool {
 	return err.code == ErrAlreadyExists || err.code == ErrConflict || err.code == ErrAborted
 }
 
-func Internal(reason string) *AError {
-	return New(ErrInternal, reason)
+func Internal(reason string, opts ...AErrorOption) *AError {
+	return New(ErrInternal, reason, opts...)
 }
 
 func IsInternal(err *AError) bool {
 	return err.code == ErrInternal || err.code == ErrInternalServerError || err.code == ErrDataLoss
 }
 
-func Unimplemented(reason string) *AError {
-	return New(ErrUnimplemented, reason)
+func Unimplemented(reason string, opts ...AErrorOption) *AError {
+	return New(ErrUnimplemented, reason, opts...)
 }
 
 func IsUnimplemented(err *AError) bool {
 	return err.code == ErrUnimplemented || err.code == ErrMethodNotAllowed || err.code == ErrNotImplemented
 }
 
-func Unavailable(reason string) *AError {
-	return New(ErrUnavailable, reason)
+func Unavailable(reason string, opts ...AErrorOption) *AError {
+	return New(ErrUnavailable, reason, opts...)
 }
 
 func IsUnavailable(err *AError) bool {
 	return err.code == ErrUnavailable || err.code == ErrServiceUnavailable
 }
 
-func DeadlineExceeded(reason string) *AError {
-	return New(ErrGatewayTimeout, reason)
+func DeadlineExceeded(reason string, opts ...AErrorOption) *AError {
+	return New(ErrGatewayTimeout, reason, opts...)
 }
 
 func IsDeadlineExceeded(err *AError) bool {

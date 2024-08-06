@@ -1,5 +1,5 @@
-.PHONY: generate-proto
-generate-proto: ## generate proto
+.PHONY: gen-proto
+gen-proto: ## generate proto
 	buf generate
 
 .PHONY: lint

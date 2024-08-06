@@ -3,9 +3,10 @@ syntax = "proto3";
 package aerrors;
 
 message ErrorDetail {
-  string Reason = 1;
-  string Message = 2;
-  string TypeCode = 3;
-  int64 HTTPCode = 4;
-  int64 GRPCCode = 5;
+  string ID = 1;
+  string Reason = 2;
+  string Message = 3;
+  string TypeCode = 4;
+  int64 HTTPCode = 5;
+  int64 GRPCCode = 6;
 }
