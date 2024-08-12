@@ -12,8 +12,13 @@ lint: ## lint
 		--concurrency=$$(getconf _NPROCESSORS_ONLN)
 
 .PHONY: test
-test: ## run the go tests
+test: ## run the tests
 	go test -coverprofile cover.out ./...
+
+.PHONY: test-bench
+test-bench: ## run the tests bench
+	go test ./... -test.run=NONE -test.bench=. -test.benchmem
+
 
 .PHONY: help
 help: ## print help
