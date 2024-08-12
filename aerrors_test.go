@@ -24,3 +24,51 @@ func C() error {
 		WithParent(fmt.Errorf("db connection error")).
 		WithStack()
 }
+
+func BenchmarkNewWithoutStack(b *testing.B) {
+	err := fmt.Errorf("db connection error")
+	for i := 0; i < b.N; i++ {
+		Internal("internal server error").
+			WithMessage("hello world").
+			WithParent(err).
+			WithID("ab6a0")
+	}
+}
+
+func BenchmarkNewWithStack(b *testing.B) {
+	err := fmt.Errorf("db connection error")
+	for i := 0; i < b.N; i++ {
+		Internal("internal server error").
+			WithMessage("hello world").
+			WithParent(err).
+			WithID("ab6a0").
+			WithStack()
+	}
+}
+
+func BenchmarkRawWithoutStack(b *testing.B) {
+	err := fmt.Errorf("db connection error")
+	for i := 0; i < b.N; i++ {
+		var aerror AError
+		(*Error)(&aerror).
+			WithCode(ErrInternal).
+			WithReason("internal server error").
+			WithMessage("hello world").
+			WithParent(err).
+			WithID("ab6a0")
+	}
+}
+
+func BenchmarkRawWithStack(b *testing.B) {
+	err := fmt.Errorf("db connection error")
+	for i := 0; i < b.N; i++ {
+		var aerror AError
+		(*Error)(&aerror).
+			WithCode(ErrInternal).
+			WithReason("internal server error").
+			WithMessage("hello world").
+			WithParent(err).
+			WithID("ab6a0").
+			WithStack()
+	}
+}

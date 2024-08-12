@@ -10,7 +10,7 @@ type HTTPCoder interface {
 }
 
 // nolint:gocyclo
-func (err ErrorCode) HTTPCode() int {
+func (err Code) HTTPCode() int {
 	switch err {
 	// GRPC Errors
 	case ErrOK:

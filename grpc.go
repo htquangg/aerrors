@@ -13,7 +13,7 @@ type GRPCCoder interface {
 }
 
 // nolint:gocyclo
-func (err ErrorCode) GRPCCode() codes.Code {
+func (err Code) GRPCCode() codes.Code {
 	switch err {
 	// GRPC Errors
 	case ErrOK:
@@ -87,12 +87,11 @@ func (err ErrorCode) GRPCCode() codes.Code {
 	}
 }
 
-func (err ErrorCode) GRPCStatus() *status.Status {
+func (err Code) GRPCStatus() *status.Status {
 	return errToStatus(err)
 }
 
-// nolint:gocritic
-func (err AError) GRPCStatus() *status.Status {
+func (err *Error) GRPCStatus() *status.Status {
 	return errToStatus(err)
 }
 
@@ -106,28 +105,28 @@ type grpcError struct {
 	message  string
 }
 
-func (err grpcError) Error() string {
+func (err *grpcError) Error() string {
 	return fmt.Sprintf("Code=%s ID=%s Reason=%s Message=(%v)", err.code, err.id, err.reason, err.message)
 }
 
-func (err grpcError) GRPCStatus() *status.Status {
+func (err *grpcError) GRPCStatus() *status.Status {
 	return err.status
 }
 
-func (err grpcError) HTTPCode() int {
+func (err *grpcError) HTTPCode() int {
 	return err.httpCode
 }
 
-func (err grpcError) GRPCCode() codes.Code {
+func (err *grpcError) GRPCCode() codes.Code {
 	return err.grpcCode
 }
 
-func (err grpcError) TypeCode() string {
+func (err *grpcError) TypeCode() string {
 	return err.code
 }
 
 // Is returns true if any of TypeCoder, HTTPCoder, GRPCCoder are a match between the error and target
-func (err grpcError) Is(target error) bool {
+func (err *grpcError) Is(target error) bool {
 	if t, ok := target.(GRPCCoder); ok && err.grpcCode == t.GRPCCode() {
 		return true
 	}
@@ -219,14 +218,14 @@ func ReceiveGRPCError(err error) error {
 		grpcCode: grpcCode,
 		httpCode: httpCode,
 		code:     embedType,
-		id: id,
+		id:       id,
 		reason:   reason,
 		message:  s.Message(),
 	}
 }
 
 // convert a code to a known Error type;
-func codeToError(code codes.Code) ErrorCode {
+func codeToError(code codes.Code) Code {
 	switch code {
 	case codes.OK:
 		return ErrOK
@@ -302,10 +301,10 @@ func errToStatus(err error) *status.Status {
 		HTTPCode: int64(httpCode),
 	}
 
-	var aErr AError
-	if ok := errors.As(err, &aErr); ok {
-		errInfo.Reason = aErr.reason
-		errInfo.Message = aErr.message
+	var e Error
+	if ok := errors.As(err, &e); ok {
+		errInfo.Reason = e.reason
+		errInfo.Message = e.message
 	}
 
 	s, _ := status.New(grpcCode, err.Error()).WithDetails(errInfo)

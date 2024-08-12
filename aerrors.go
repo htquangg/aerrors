@@ -11,16 +11,16 @@ type TypeCoder interface {
 	TypeCode() string
 }
 
-type ErrorCode string
+type Code string
 
-func (err ErrorCode) TypeCode() string {
+func (err Code) TypeCode() string {
 	if err == ErrOK {
 		return ""
 	}
 	return string(err)
 }
 
-func (err ErrorCode) Error() string {
+func (err Code) Error() string {
 	if err == ErrOK {
 		return ""
 	}
@@ -28,91 +28,25 @@ func (err ErrorCode) Error() string {
 	return string(err)
 }
 
-type AErrorOption func(*AError)
+type Error AError
 
 type AError struct {
-	code    ErrorCode
+	code    Code
 	parent  error
 	id      string
 	reason  string
 	message string
 	stack   string
+	skip    int
 }
 
-func New(code ErrorCode, reason string, opts ...AErrorOption) *AError {
-	err := &AError{code: code, reason: reason}
-
-	for _, opt := range opts {
-		opt(err)
-	}
-
-	return err
+func New(code Code, reason string) *Error {
+	var err AError
+	(*Error)(&err).WithCode(code).WithReason(reason)
+	return (*Error)(&err)
 }
 
-func (err *AError) Code() ErrorCode {
-	return err.code
-}
-
-func (err *AError) Parent() error {
-	return err.parent
-}
-
-func (err *AError) ID() string {
-	return err.id
-}
-
-func (err *AError) Reason() string {
-	return err.reason
-}
-
-func (err *AError) Message() string {
-	return err.message
-}
-
-func (err *AError) Stack() string {
-	return err.stack
-}
-
-func WithCode(code ErrorCode) AErrorOption {
-	return func(err *AError) {
-		err.code = code
-	}
-}
-
-func WithParent(parent error) AErrorOption {
-	return func(err *AError) {
-		err.parent = parent
-	}
-}
-
-func WithID(id string) AErrorOption {
-	return func(err *AError) {
-		err.id = id
-	}
-}
-
-func WithReason(reason string) AErrorOption {
-	return func(err *AError) {
-		err.reason = reason
-	}
-}
-
-func WithMessage(message string) AErrorOption {
-	return func(err *AError) {
-		err.message = message
-	}
-}
-
-
-func (err *AError) WithCode(code ErrorCode) *AError {
-	if err == nil {
-		return nil
-	}
-	err.code = code
-	return err
-}
-
-func (err *AError) WithParent(parent error) *AError {
+func (err *Error) WithParent(parent error) *Error {
 	if err == nil {
 		return nil
 	}
@@ -120,7 +54,7 @@ func (err *AError) WithParent(parent error) *AError {
 	return err
 }
 
-func (err *AError) WithID(id string) *AError {
+func (err *Error) WithID(id string) *Error {
 	if err == nil {
 		return nil
 	}
@@ -128,7 +62,15 @@ func (err *AError) WithID(id string) *AError {
 	return err
 }
 
-func (err *AError) WithReason(reason string) *AError {
+func (err *Error) WithCode(code Code) *Error {
+	if err == nil {
+		return nil
+	}
+	err.code = code
+	return err
+}
+
+func (err *Error) WithReason(reason string) *Error {
 	if err == nil {
 		return nil
 	}
@@ -136,7 +78,7 @@ func (err *AError) WithReason(reason string) *AError {
 	return err
 }
 
-func (err *AError) WithMessage(message string) *AError {
+func (err *Error) WithMessage(message string) *Error {
 	if err == nil {
 		return nil
 	}
@@ -144,16 +86,17 @@ func (err *AError) WithMessage(message string) *AError {
 	return err
 }
 
-func (err *AError) WithStack() *AError {
+func (err *Error) WithStack() *Error {
 	if err == nil {
 		return nil
 	}
-	err.message = LogStack(2, 0)
+	const depth = 32
+	err.stack = LogStack(2+err.skip, depth)
 	return err
 }
 
 // nolint:gocritic
-func (err AError) Error() string {
+func (err Error) Error() string {
 	str := bytes.NewBuffer([]byte{})
 	fmt.Fprintf(str, "code: %s, ", err.code.Error())
 	str.WriteString("id: ")
@@ -174,8 +117,8 @@ func (err AError) Error() string {
 	return str.String()
 }
 
-func (err *AError) Is(target error) bool {
-	t, ok := target.(*AError)
+func (err *Error) Is(target error) bool {
+	t, ok := target.(*Error)
 	if !ok {
 		return false
 	}
@@ -205,39 +148,9 @@ func TypeCode(err error) string {
 	if err == nil {
 		return ErrOK.TypeCode()
 	}
-
 	var e TypeCoder
 	if errors.As(err, &e) {
 		return e.TypeCode()
 	}
 	return ErrUnknown.TypeCode()
-}
-
-func (e ErrorCode) Wrap(err error, msg string) error {
-	if err == nil {
-		return nil
-	}
-	return AError{code: e, parent: err, message: msg}
-}
-
-func Wrap(err error, msg string) error {
-	if err == nil {
-		return nil
-	}
-	switch err.(type) {
-	case AError:
-		return AError{parent: err, message: fmt.Sprintf("%s: %s", msg, err.Error())}
-	case TypeCoder:
-		return AError{parent: err, message: msg}
-	default:
-		return AError{parent: err, code: ErrInternal, message: fmt.Sprintf("%s: %s", msg, err.Error())}
-	}
-}
-
-func As(err error, target interface{}) bool {
-	return errors.As(err, target)
-}
-
-func Is(err, target error) bool {
-	return errors.Is(err, target)
 }
