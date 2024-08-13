@@ -31,3 +31,4 @@ BenchmarkRawWithoutStack-8              361526726                3.313 ns/op    
 Based off work in:
 
 - [stackus/errors](https://github.com/stackus/errors/tree/master)
+- [pacman/errors](https://github.com/segmentfault/pacman/tree/main/errors)
