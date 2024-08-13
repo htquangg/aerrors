@@ -17,7 +17,12 @@ test: ## run the tests
 
 .PHONY: test-bench
 test-bench: ## run the tests bench
-	go test ./... -test.run=NONE -test.bench=. -test.benchmem
+	go test ./... -test.run=NONE -test.bench=. -test.benchmem | tee ./assets/out.dat ; \
+	awk '/Benchmark/{count ++; gsub(/BenchmarkTest/,""); printf("%d,%s,%s,%s\n",count,$$1,$$2,$$3)}' ./assets/out.dat > ./assets/final.dat ; \
+		gnuplot -e "file_path='./assets/final.dat'" -e "graphic_file_name='./assets/operations.png'" -e "y_label='number of operations'" -e "y_range_min='000000000''" -e "y_range_max='400000000'" -e "column_1=1" -e "column_2=3" ./assets/performance.gp ; \
+		gnuplot -e "file_path='./assets/final.dat'" -e "graphic_file_name='./assets/time_operations.png'" -e "y_label='each operation in nanoseconds'" -e "y_range_min='000''" -e "y_range_max='45000'" -e "column_1=1" -e "column_2=4" ./assets/performance.gp ; \
+		rm -f ./assets/out.dat ./assets/final.dat ; \
+		echo "'assets/operations.png' and 'assets/time_operations.png' graphics were generated."
 
 
 .PHONY: help
