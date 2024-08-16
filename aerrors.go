@@ -1,11 +1,36 @@
 package aerrors
 
 import (
-	"bytes"
 	"errors"
-	"fmt"
+	"io"
 	"reflect"
+	"sync"
 )
+
+var LogWriter io.Writer
+
+var errorPool = &sync.Pool{
+	New: func() interface{} {
+		return &AError{
+			buf: make([]byte, 0, 500),
+		}
+	},
+}
+
+func (err AError) write() {
+	LogWriter.Write(err.buf)
+}
+
+func newAError(code Code, reason string) *AError {
+	e := errorPool.Get().(*AError)
+	e.buf = e.buf[:0]
+	e.withCode(code).withReason(reason)
+	return e
+}
+
+func putEvent(e *AError) {
+	errorPool.Put(e)
+}
 
 type TypeCoder interface {
 	TypeCode() string
@@ -28,97 +53,74 @@ func (err Code) Error() string {
 	return string(err)
 }
 
-type Error AError
+type Error interface {
+	Error() string
+}
+
+type Builder interface {
+	WithParent(parent error) Builder
+	WithMessage(message string) Builder
+	WithStack() Builder
+	Err() Error
+	withCode(code Code) Builder
+	withReason(reason string) Builder
+}
 
 type AError struct {
-	code    Code
 	parent  error
-	id      string
+	code    Code
 	reason  string
 	message string
 	stack   string
-	skip    int
+	buf     []byte
 }
 
-func New(code Code, reason string) *Error {
-	var err AError
-	(*Error)(&err).WithCode(code).WithReason(reason)
-	return (*Error)(&err)
+func New(code Code, reason string) Builder {
+	return newAError(code, reason)
 }
 
-func (err *Error) WithParent(parent error) *Error {
+func (err *AError) WithParent(parent error) Builder {
 	if err == nil {
 		return nil
 	}
 	err.parent = parent
+	err.buf = err.appendString(err.appendKey(err.buf, "parent"), parent.Error())
 	return err
 }
 
-func (err *Error) WithID(id string) *Error {
-	if err == nil {
-		return nil
-	}
-	err.id = id
-	return err
-}
-
-func (err *Error) WithCode(code Code) *Error {
-	if err == nil {
-		return nil
-	}
-	err.code = code
-	return err
-}
-
-func (err *Error) WithReason(reason string) *Error {
-	if err == nil {
-		return nil
-	}
-	err.reason = reason
-	return err
-}
-
-func (err *Error) WithMessage(message string) *Error {
+func (err *AError) WithMessage(message string) Builder {
 	if err == nil {
 		return nil
 	}
 	err.message = message
+	err.buf = err.appendString(err.appendKey(err.buf, "message"), message)
 	return err
 }
 
-func (err *Error) WithStack() *Error {
+func (err *AError) WithStack() Builder {
 	if err == nil {
 		return nil
 	}
 	const depth = 32
-	err.stack = LogStack(2+err.skip, depth)
+	err.stack = LogStack(2, depth)
 	return err
 }
 
-// nolint:gocritic
-func (err Error) Error() string {
-	str := bytes.NewBuffer([]byte{})
-	fmt.Fprintf(str, "code: %s, ", err.code.Error())
-	str.WriteString("id: ")
-	str.WriteString(err.id + ", ")
-	str.WriteString("reason: ")
-	str.WriteString(err.reason + ", ")
-	str.WriteString("message: ")
-	str.WriteString(err.message)
-	if err.parent != nil {
-		str.WriteString(", error: ")
-		str.WriteString(err.parent.Error())
+func (err *AError) Err() Error {
+	if err == nil {
+		return err
 	}
-	if err.stack != "" {
-		str.WriteString("\n")
-		str.WriteString(err.stack)
-	}
-
-	return str.String()
+	err.buf = err.appendString(err.appendLineBreak(err.buf), err.stack)
+	putEvent(err)
+	return err
 }
 
-func (err *Error) Is(target error) bool {
-	t, ok := target.(*Error)
+func (err AError) Error() string {
+	return BytesToString(err.buf)
+}
+
+func (err *AError) Is(target error) bool {
+	t, ok := target.(*AError)
 	if !ok {
 		return false
 	}
@@ -144,6 +146,20 @@ func (err *AError) As(target interface{}) bool {
 	return true
 }
 
+func (err *AError) withCode(code Code) Builder {
+	err.code = code
+	err.buf = err.appendString(err.appendKey(err.buf, "code"), code.Error())
+	return err
+}
+
+func (err *AError) withReason(reason string) Builder {
+	err.reason = reason
+	err.buf = err.appendString(err.appendKey(err.buf, "reason"), reason)
+	return err
+}
+
+var noEscapeTable = [256]bool{}
+
 func TypeCode(err error) string {
 	if err == nil {
 		return ErrOK.TypeCode()
@@ -153,4 +169,21 @@ func TypeCode(err error) string {
 		return e.TypeCode()
 	}
 	return ErrUnknown.TypeCode()
+}
+
+func (e *AError) appendKey(dst []byte, key string) []byte {
+	if (len(dst)) != 0 {
+		dst = append(dst, ',')
+	}
+	return append(e.appendString(dst, key), ':')
+}
+
+func (err *AError) appendString(dst []byte, s string) []byte {
+	b := StringToBytes(s)
+	dst = append(dst, b...)
+	return dst
+}
+
+func (err *AError) appendLineBreak(dst []byte) []byte {
+	return append(dst, '\n')
 }

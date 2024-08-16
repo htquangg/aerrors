@@ -91,22 +91,26 @@ func (err Code) GRPCStatus() *status.Status {
 	return errToStatus(err)
 }
 
-func (err *Error) GRPCStatus() *status.Status {
+func (err *AError) GRPCStatus() *status.Status {
 	return errToStatus(err)
 }
 
 type grpcError struct {
 	status   *status.Status
-	grpcCode codes.Code
-	httpCode int
-	id       string
 	code     string
 	reason   string
 	message  string
+	httpCode int
+	grpcCode codes.Code
 }
 
 func (err *grpcError) Error() string {
-	return fmt.Sprintf("Code=%s ID=%s Reason=%s Message=(%v)", err.code, err.id, err.reason, err.message)
+	return fmt.Sprintf(
+		"Code=%s Reason=%s Message=(%v)",
+		err.code,
+		err.reason,
+		err.message,
+	)
 }
 
 func (err *grpcError) GRPCStatus() *status.Status {
@@ -198,7 +202,6 @@ func ReceiveGRPCError(err error) error {
 	grpcCode := s.Code()
 	httpCode := ErrUnknown.HTTPCode()
 	embedType := codeToError(grpcCode).TypeCode()
-	id := ""
 	reason := ErrUnknown.Error()
 
 	for _, detail := range s.Details() {
@@ -207,7 +210,6 @@ func ReceiveGRPCError(err error) error {
 			grpcCode = codes.Code(d.GRPCCode)
 			httpCode = int(d.HTTPCode)
 			embedType = d.TypeCode
-			id = d.ID
 			reason = d.Reason
 		default:
 		}
@@ -218,7 +220,6 @@ func ReceiveGRPCError(err error) error {
 		grpcCode: grpcCode,
 		httpCode: httpCode,
 		code:     embedType,
-		id:       id,
 		reason:   reason,
 		message:  s.Message(),
 	}
@@ -301,10 +302,10 @@ func errToStatus(err error) *status.Status {
 		HTTPCode: int64(httpCode),
 	}
 
-	var e Error
+	var e AError
 	if ok := errors.As(err, &e); ok {
 		errInfo.Reason = e.reason
-		errInfo.Message = e.message
+		// errInfo.Message = e.message
 	}
 
 	s, _ := status.New(grpcCode, err.Error()).WithDetails(errInfo)

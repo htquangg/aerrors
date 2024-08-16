@@ -40,7 +40,7 @@ const (
 	ErrGatewayTimeout             Code = "GATEWAY_TIMEOUT"               // HTTP: 504 GRPC: codes.DeadlineExceeded
 )
 
-func InvalidArgument(reason string) *Error {
+func InvalidArgument(reason string) Builder {
 	return New(ErrInvalidArgument, reason)
 }
 
@@ -48,7 +48,7 @@ func IsValidArgument(err *AError) bool {
 	return err.code == ErrInvalidArgument
 }
 
-func FailedPrecondition(reason string) *Error {
+func FailedPrecondition(reason string) Builder {
 	return New(ErrFailedPrecondition, reason)
 }
 
@@ -56,7 +56,7 @@ func IsFailedPrecondition(err *AError) bool {
 	return err.code == ErrFailedPrecondition
 }
 
-func Unauthentication(reason string) *Error {
+func Unauthentication(reason string) Builder {
 	return New(ErrUnauthenticated, reason)
 }
 
@@ -64,7 +64,7 @@ func IsUnauthentication(err *AError) bool {
 	return err.code == ErrUnauthenticated || err.code == ErrUnauthorized
 }
 
-func PermissionDenied(reason string) *Error {
+func PermissionDenied(reason string) Builder {
 	return New(ErrPermissionDenied, reason)
 }
 
@@ -72,7 +72,7 @@ func IsPermissionDenied(err *AError) bool {
 	return err.code == ErrPermissionDenied || err.code == ErrForbidden
 }
 
-func NotFound(reason string) *Error {
+func NotFound(reason string) Builder {
 	return New(ErrNotFound, reason)
 }
 
@@ -80,7 +80,7 @@ func IsNotFound(err *AError) bool {
 	return err.code == ErrNotFound
 }
 
-func AlreadyExists(reason string) *Error {
+func AlreadyExists(reason string) Builder {
 	return New(ErrConflict, reason)
 }
 
@@ -88,7 +88,7 @@ func IsAlreadyExists(err *AError) bool {
 	return err.code == ErrAlreadyExists || err.code == ErrConflict || err.code == ErrAborted
 }
 
-func Internal(reason string) *Error {
+func Internal(reason string) Builder {
 	return New(ErrInternal, reason)
 }
 
@@ -96,15 +96,16 @@ func IsInternal(err *AError) bool {
 	return err.code == ErrInternal || err.code == ErrInternalServerError || err.code == ErrDataLoss
 }
 
-func Unimplemented(reason string) *Error {
+func Unimplemented(reason string) Builder {
 	return New(ErrUnimplemented, reason)
 }
 
 func IsUnimplemented(err *AError) bool {
-	return err.code == ErrUnimplemented || err.code == ErrMethodNotAllowed || err.code == ErrNotImplemented
+	return err.code == ErrUnimplemented || err.code == ErrMethodNotAllowed ||
+		err.code == ErrNotImplemented
 }
 
-func Unavailable(reason string) *Error {
+func Unavailable(reason string) Builder {
 	return New(ErrUnavailable, reason)
 }
 
@@ -112,7 +113,7 @@ func IsUnavailable(err *AError) bool {
 	return err.code == ErrUnavailable || err.code == ErrServiceUnavailable
 }
 
-func DeadlineExceeded(reason string) *Error {
+func DeadlineExceeded(reason string) Builder {
 	return New(ErrGatewayTimeout, reason)
 }
 
