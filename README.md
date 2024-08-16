@@ -17,13 +17,16 @@ Go 1.22
 goos: darwin
 goarch: arm64
 pkg: github.com/htquangg/aerrors
-BenchmarkInternalWithStack-8              447028              2658 ns/op            1768 B/op         13 allocs/op
-BenchmarkInternalWithoutStack-8         367436594                3.258 ns/op           0 B/op          0 allocs/op
-BenchmarkNewWithStack-8                   444240              2638 ns/op            1656 B/op         13 allocs/op
-BenchmarkNewlWithoutStack-8             365891073                3.265 ns/op           0 B/op          0 allocs/op
-BenchmarkRawWithStack-8                   445426              2623 ns/op            1656 B/op         13 allocs/op
-BenchmarkRawWithoutStack-8              361526726                3.313 ns/op           0 B/op          0 allocs/op
+BenchmarkInternalWithStack-8             1673311               685.7 ns/op          1536 B/op         11 allocs/op
+BenchmarkInternalWithoutStack-8         144404904                8.213 ns/op           0 B/op          0 allocs/op
+BenchmarkInternaEmptylWithStack-8        1567843               757.4 ns/op          1536 B/op         11 allocs/op
+BenchmarkInternalEmptyWithoutStack-8    252769448                4.510 ns/op           0 B/op          0 allocs/op
+BenchmarkNewEmptyWithStack-8             1701417               709.9 ns/op          1536 B/op         11 allocs/op
+BenchmarkNewEmptylWithoutStack-8        266327073                4.640 ns/op           0 B/op          0 allocs/op
+BenchmarkNewWithStack-8                  1658805               718.7 ns/op          1536 B/op         11 allocs/op
+BenchmarkNewlWithoutStack-8             117173900                9.539 ns/op           0 B/op          0 allocs/op
 ```
+
 ![operations](./assets/operations.png)
 ![time operations](./assets/time_operations.png)
 
