@@ -30,8 +30,13 @@ BenchmarkNewlWithoutStack-8             117173900                9.539 ns/op    
 ![operations](./assets/operations.png)
 ![time operations](./assets/time_operations.png)
 
-## Credit:
+## Credits:
 Based off work in:
 
 - [stackus/errors](https://github.com/stackus/errors/tree/master)
 - [pacman/errors](https://github.com/segmentfault/pacman/tree/main/errors)
+
+## License
+```
+Dont be a shitty human being and make your own solution.
+```
