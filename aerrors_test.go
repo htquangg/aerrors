@@ -3,7 +3,6 @@ package aerrors
 import (
 	"errors"
 	"fmt"
-	"os"
 	"testing"
 )
 
@@ -14,8 +13,6 @@ var (
 )
 
 func TestNew(t *testing.T) {
-	LogWriter = os.Stderr
-
 	e := A()
 	fmt.Printf("%s\n\n", e)
 	fmt.Printf("%v\n\n", e)

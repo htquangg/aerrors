@@ -305,7 +305,7 @@ func errToStatus(err error) *status.Status {
 	var e AError
 	if ok := errors.As(err, &e); ok {
 		errInfo.Reason = e.reason
-		// errInfo.Message = e.message
+		errInfo.Message = e.message
 	}
 
 	s, _ := status.New(grpcCode, err.Error()).WithDetails(errInfo)

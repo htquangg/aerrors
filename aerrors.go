@@ -2,12 +2,9 @@ package aerrors
 
 import (
 	"errors"
-	"io"
 	"reflect"
 	"sync"
 )
-
-var LogWriter io.Writer
 
 var errorPool = &sync.Pool{
 	New: func() interface{} {
@@ -15,10 +12,6 @@ var errorPool = &sync.Pool{
 			buf: make([]byte, 0, 500),
 		}
 	},
-}
-
-func (err AError) write() {
-	LogWriter.Write(err.buf)
 }
 
 func newAError(code Code, reason string) *AError {
@@ -108,13 +101,14 @@ func (err *AError) WithStack() Builder {
 
 func (err *AError) Err() Error {
 	if err == nil {
-		return err
+		return nil
 	}
 	err.buf = err.appendString(err.appendLineBreak(err.buf), err.stack)
 	putEvent(err)
 	return err
 }
 
+// nolint
 func (err AError) Error() string {
 	return BytesToString(err.buf)
 }
@@ -158,8 +152,6 @@ func (err *AError) withReason(reason string) Builder {
 	return err
 }
 
-var noEscapeTable = [256]bool{}
-
 func TypeCode(err error) string {
 	if err == nil {
 		return ErrOK.TypeCode()
@@ -171,11 +163,11 @@ func TypeCode(err error) string {
 	return ErrUnknown.TypeCode()
 }
 
-func (e *AError) appendKey(dst []byte, key string) []byte {
+func (err *AError) appendKey(dst []byte, key string) []byte {
 	if (len(dst)) != 0 {
 		dst = append(dst, ',')
 	}
-	return append(e.appendString(dst, key), ':')
+	return append(err.appendString(dst, key), ':')
 }
 
 func (err *AError) appendString(dst []byte, s string) []byte {

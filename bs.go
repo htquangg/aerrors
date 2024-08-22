@@ -17,6 +17,7 @@ func BytesToString(b []byte) string {
 // StringToBytes converts string to a byte slice without memory allocation.
 //
 // Note it may break if the implementation of string or slice header changes in the future go versions.
+// nolint
 func StringToBytes(s string) (b []byte) {
 	/* #nosec G103 */
 	sh := (*reflect.StringHeader)(unsafe.Pointer(&s))
