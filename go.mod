@@ -3,7 +3,7 @@ module github.com/htquangg/aerrors
 go 1.22.2
 
 require (
-	google.golang.org/grpc v1.65.0
+	google.golang.org/grpc v1.66.0
 	google.golang.org/protobuf v1.34.2
 )
 
