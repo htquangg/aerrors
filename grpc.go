@@ -113,7 +113,7 @@ func (err *grpcError) Error() string {
 	)
 }
 
-func (err *grpcError) GRPCStatus() *status.Status {
+func (err *grpcError) Status() *status.Status {
 	return err.status
 }
 
@@ -223,6 +223,14 @@ func ReceiveGRPCError(err error) error {
 		reason:   reason,
 		message:  s.Message(),
 	}
+}
+
+func ExtractGRPCError(err error) (c codes.Code, msg string, ok bool) {
+	grpcErr, _ := ReceiveGRPCError(err).(*grpcError)
+	if grpcErr == nil {
+		return codes.OK, "", false
+	}
+	return grpcErr.GRPCCode(), grpcErr.message, true
 }
 
 // convert a code to a known Error type;
